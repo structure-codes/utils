@@ -23,12 +23,11 @@ export const getTabChar = (text: string): string | null => {
   return match?.[1] || null;
 };
 
-export const getBranchPrefix = (depth: boolean[], isLastBranch: boolean) => {
+export const getBranchPrefix = (depth: boolean[], isLastBranch: boolean, tabChar = "  ") => {
   let base = "";
-  const tab = "  ";
   depth.forEach(
     (isLastBranch) =>
-      (base = base.concat(isLastBranch ? tab : `${TRUNK}${tab}`))
+      (base = base.concat(isLastBranch ? tabChar : `${TRUNK}${tabChar}`))
   );
   if (isLastBranch) return base + LAST_BRANCH + " ";
   else return base + BRANCH + " ";

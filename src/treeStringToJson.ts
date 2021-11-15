@@ -4,14 +4,15 @@ import { TreeType } from "./types";
 
 // INDEX_NAME is randomly generated as a unique string so that it does not 
 // overlap with filenames in the tree JSON output
-const INDEX_NAME = uuid();
+export const INDEX_NAME = uuid();
 
 /**
  * Converts a tree string output to a json object
- * @param {String} text
+ * @param text
+ * @param includeIndex whether or not the results need to include index
  * @returns JSON object representing the tree
  */
-export const treeStringToJson = (text: string) => {
+export const treeStringToJson = (text: string, includeIndex = true): TreeType => {
   const elements = new Set();
   let prevLine = "";
   const path: string[] = [];
@@ -27,7 +28,7 @@ export const treeStringToJson = (text: string) => {
 
   // look for line breaks that works on all platforms
   treeFormatted.split(EOL_MATCH).forEach((line, index) => {
-    const isTreeFormat = line.match(/^(\t+)?(│|├──|└──|\t)+ .+/);
+    const isTreeFormat = line.match(/^(\t+)?(│|├──|└──|\t)+.+/);
     if (!isTreeFormat) return {};
     const prevPrefix = prevLine.split(" ")[0];
     const prevNumTabs = getNumberOfTabs(prevPrefix);
@@ -58,7 +59,7 @@ export const treeStringToJson = (text: string) => {
       (branch: TreeType, filename: string) => branch[filename],
       elements
     );
-    current[filename] = { [INDEX_NAME]: index };
+    current[filename] = includeIndex ? { [INDEX_NAME]: index } : {};
     prevLine = line;
     path.push(filename);
   });
