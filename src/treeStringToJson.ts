@@ -8,14 +8,16 @@ export const INDEX_NAME = uuid();
 
 /**
  * Converts a tree string output to a json object
- * @param text
- * @param includeIndex whether or not the results need to include index
+ * @param text - String to convert to a tree JSON object
  * @returns JSON object representing the tree
  */
 export const treeStringToJson = (text: string): TreeType[] => {
   const elements: TreeType[] = [];
+  // Current location in the tree to add new children too
+  let current: TreeType[] = elements;
+  // Path is a stack that contains nodes at each level of current position in tree
+  const path: TreeType[] = [];
   let prevLine = "";
-  const path: string[] = [];
 
   const tabChar = getTabChar(text);
   if (!tabChar) {
@@ -29,33 +31,32 @@ export const treeStringToJson = (text: string): TreeType[] => {
   // look for line breaks that works on all platforms
   treeFormatted.split(EOL_MATCH).forEach((line, index) => {
     const isTreeFormat = line.match(/^(\t+)?(│|├──|└──|\t)+.+/);
-    if (!isTreeFormat) return {};
+    if (!isTreeFormat) return;
     const prevPrefix = prevLine.split(" ")[0];
     const prevNumTabs = getNumberOfTabs(prevPrefix);
+    // thanks to our formatting, a space will always separate prefix and suffix
     const prefix = line.split(" ")[0];
     const numTabs = getNumberOfTabs(prefix);
-    const filename: string = line.substr(prefix.length).trim();
+    const filename: string = line.substring(prefix.length).trim();
     // Pop a certain number of elements from path
     const popCount = numTabs <= prevNumTabs ? prevNumTabs - numTabs + 1 : 0;
     Array(popCount)
       .fill("pop")
       .forEach(() => path.pop());
-
-    // probably could be made more performant
-    let current = elements;
-    path.forEach((node) => {
-      const next = current?.find(c => c.name === node)?.children;
-      if (next) current = next;
-    });
     
-    current.push({
+    const node: TreeType = {
+      _index: index,
       name: filename,
       children: [],
-      index,
-    });
+    };
+
+    // If we are at root, add root node - else add it to previous parent's children
+    current = path.length > 0 ? path[path.length - 1].children : elements;
+    current.push(node);
+    // Add the new node to the path stack
+    path.push(node);
 
     prevLine = line;
-    path.push(filename);
   });
 
   return elements;
