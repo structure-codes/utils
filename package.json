@@ -1,6 +1,6 @@
 {
   "name": "@structure-codes/utils",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A library containing utilities to convert tree structures between JSON and string formats",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
