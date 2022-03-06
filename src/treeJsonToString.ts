@@ -6,20 +6,20 @@ import { ISettings, TreeType } from "./types";
  * @param tree
  * @returns string format of tree
  */
-export const treeJsonToString = (tree: TreeType, tabChar = "  ", options?: ISettings): string => {
+export const treeJsonToString = (tree: TreeType[], tabChar = "  ", options?: ISettings): string => {
   let treeString = "";
-  const parseBranches = (tree: TreeType, depth: boolean[]) => {
-    const branches = Object.entries(tree);
-    branches.forEach(([key, values], index) => {
-      const isLastBranch = index === branches.length - 1;
+  const parseBranches = (tree: TreeType[], depth: boolean[]) => {
+    tree.forEach((branch, index) => {
+      const isLastBranch = index === tree.length - 1;
       const prefix = getBranchPrefix(depth, isLastBranch, tabChar);
-      const branchString = prefix + key + "\n";
+      const branchString = prefix + branch.name + "\n";
       treeString = treeString.concat(branchString);
-      parseBranches(values, [...depth, isLastBranch]);
+      if (!branch.children) return;
+      parseBranches(branch.children, [...depth, isLastBranch]);
     });
   };
   parseBranches(tree, []);
   treeString = treeString.replace(/\n$/, "");
-
+  
   return treeString;
 };

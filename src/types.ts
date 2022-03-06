@@ -1,7 +1,9 @@
-export type TreeType = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any
-};
+export interface TreeType {
+  name: string;
+  index: number;
+  children: TreeType[]
+  attributes?: Record<string, string | number | boolean>,
+}
 
 export interface ISettings {
   depth: number;

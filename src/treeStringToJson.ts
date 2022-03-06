@@ -12,15 +12,15 @@ export const INDEX_NAME = uuid();
  * @param includeIndex whether or not the results need to include index
  * @returns JSON object representing the tree
  */
-export const treeStringToJson = (text: string, includeIndex = true): TreeType => {
-  const elements = new Set();
+export const treeStringToJson = (text: string): TreeType[] => {
+  const elements: TreeType[] = [];
   let prevLine = "";
   const path: string[] = [];
 
   const tabChar = getTabChar(text);
   if (!tabChar) {
     console.error("Unable to parse tab character");
-    return {};
+    return [];
   }
 
   // replace whatever tabChar is used with \t in memory to make parsing easier
@@ -41,27 +41,22 @@ export const treeStringToJson = (text: string, includeIndex = true): TreeType =>
       .fill("pop")
       .forEach(() => path.pop());
 
-    /* 
-      EXAMPLE OF REDUCER FUNCTION
-        For each element in path, return elements[pathItem]
-        The result is the branch in elements for the current path
-        path = [ "src/", "Home/"]
-        elements = { 
-          "src/": { 
-            "Home/": {} 
-          }
-        }
-        iter1 = elements["src/"]
-        iter2 = elements["src/"]["Home/"]
-        curr = {}
-    */
-    const current: TreeType = path.reduce(
-      (branch: TreeType, filename: string) => branch[filename],
-      elements
-    );
-    current[filename] = includeIndex ? { [INDEX_NAME]: index } : {};
+    // probably could be made more performant
+    let current = elements;
+    path.forEach((node) => {
+      const next = current?.find(c => c.name === node)?.children;
+      if (next) current = next;
+    });
+    
+    current.push({
+      name: filename,
+      children: [],
+      index,
+    });
+
     prevLine = line;
     path.push(filename);
   });
+
   return elements;
 };

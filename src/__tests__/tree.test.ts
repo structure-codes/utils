@@ -1,31 +1,25 @@
 import { treeStringToJson } from "../treeStringToJson";
 import * as fs from "fs";
 import * as path from "path";
+import { TreeType } from "../types";
+import { treeJsonToString } from "../treeJsonToString";
 
 const dirPath = path.join(__dirname, "trees");
 const trees = fs.readdirSync(dirPath);
 trees.forEach((file) => {
   const treeString = fs.readFileSync(path.join(dirPath, file)).toString();
-  test(`can read tree file: ${file}`, () => {
-    const tree = treeStringToJson(treeString);
-    expect(typeof tree).toBe("object");
-    // Sample excerpt of object being used in testing
-    // tree = {
-    //   "functions": {
-    //     "index": "2342fdsedf32",
-    //   },
-    //   "src": {
-    //     "index": "2342fdsedf32",
-    //   },
-    //   "static": {
-    //     "index": "2342fdsedf32",
-    //   },
-    // };
+  let tree: TreeType[];
+  test(`can convert file to TreeType format: ${file}`, () => {
+    tree = treeStringToJson(treeString);
 
     // Number of parents
-    const children: string[] = Object.keys(tree);
-    expect(children.length).toBe(3);
-    const lastChild: string = children[2];
-    expect(lastChild).toBe("static");
+    expect(tree.length).toBe(3);
+    // Last node is dir name "static"
+    expect(tree[2].name).toBe("static");
+  });
+
+  test("can convert TreeType format back to original string", () => {
+    const newTreeString = treeJsonToString(tree);
+    expect(treeString === newTreeString);
   });
 });
